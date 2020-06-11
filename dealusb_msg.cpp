@@ -356,6 +356,38 @@ void DealUsb_msg::loadLocalArray()
         emit Display_log_signal(log_str);
     }
 
+
+
+
+    //读取相机的内参与畸变参数
+    QSettings paraSetting("setting.ini", QSettings::IniFormat);
+    fx = paraSetting.value("camera_calibration/fx").toString().toFloat();
+    fy = paraSetting.value("camera_calibration/fy").toString().toFloat();
+    cx = paraSetting.value("camera_calibration/cx").toString().toFloat();
+    cy = paraSetting.value("camera_calibration/cy").toString().toFloat();
+    k1 = paraSetting.value("camera_calibration/k1").toString().toFloat();
+    k2 = paraSetting.value("camera_calibration/k2").toString().toFloat();
+
+    qDebug()<<" fx="<<fx<<" fy="<<fy<<" cx="<<cx<<" cy="<<cy<<" k1="<<k1<<"  k2="<<k2;
+    if(fx<1 && fy<1 && cx<1 && cy<1 && k1<1 && k2<1)
+    {
+        fx = 169.7123;
+        fy = 162.7944;
+        cx = 80.5252;
+        cy = 59.9091;
+        k1 = 0.3411;
+        k2 = -1.4510;
+
+        log_str = "[load conf file error]:Setting.ini";
+        emit Display_log_signal(log_str);
+
+    }else
+    {
+//        log_str = "[load conf file success]:Setting.ini";
+//        emit Display_log_signal(log_str);
+    }
+
+
 }
 
 //!
@@ -572,20 +604,21 @@ void DealUsb_msg::tof_filter()
 //!                        float undistorted_peak[160][120];
 void DealUsb_msg::distortionCorrect_slot()
 {
-    float k1 = 0.3411;
-    float k2 = -1.4510;
-    float p1 = 0;
-    float p2 = 0;
-    float fx = 169.7123;
-    float fy = 162.7944;
-    float cx = 80.5252;
-    float cy = 59.9091;
+//    double k1 = 0.3411;
+//    double k2 = -1.4510;
+//    double p1 = 0;
+//    double p2 = 0;
+//    double fx = 169.7123;
+//    double fy = 162.7944;
+//    double cx = 80.5252;
+//    double cy = 59.9091;
 
 
-    float u_distorted = 0;
-    float v_distorted = 0;
 
-    float XC1,YC1,XC2,YC2,r2;
+    double u_distorted = 0;
+    double v_distorted = 0;
+
+    double XC1,YC1,XC2,YC2,r2;
 
     for(int v=0; v<120; v++)
     {
@@ -606,14 +639,11 @@ void DealUsb_msg::distortionCorrect_slot()
 
             if(u_distorted >= 0 && v_distorted >= 0 && u_distorted < 160 && v_distorted < 120)
             {
-                int current_row = v_distorted;
-                int current_col = u_distorted;
-
-//                qDebug()<<"u = "<<u<<"  current_u="<<current_row;
-//                qDebug()<<"v = "<<v<<"  current_v="<<current_col;
+                int current_row =  (v_distorted);
+                int current_col = (u_distorted);
 
                 undistorted_tof[u][v] = afterMid_tof[current_col][current_row];
-                undistorted_peak[u][v] = afterMid_tof[current_col][current_row];
+                undistorted_peak[u][v] = src_peak[current_col][current_row];
 
             }else
             {
@@ -885,9 +915,20 @@ void DealUsb_msg::UV910_Qtech_deal_slot(QByteArray array)
             }
 
 
+            //12、 鼠标显示相关
+            mouseShowMutex.lock();
+            mouseShowTOF[colImg][rowImg] = tof;
+            mouseShowPEAK[colImg][rowImg] = peak;
+            mouseShowDepth[colImg][rowImg] = temp_y;
+            mouseShow_X[colImg][rowImg] = temp_x;
+            mouseShow_Z[colImg][rowImg] = temp_z;
+            mouseShowMutex.unlock();
+
+
+
 //            qDebug()<<" cloudIndex =  "<<cloudIndex;
 
-            // 12、二维、三维图像赋值
+            // 13、二维、三维图像赋值
             QRgb tofColor,intenColor;
             int gainIndex_tof = tof*gainImage_tof;
             int gainIndex_intensity =peak * gainImage_peak;
@@ -963,14 +1004,29 @@ void DealUsb_msg::UV910_Qtech_deal_slot(QByteArray array)
 //!//tof值 x_pix的位置标号  y_pix的位置标号
 float DealUsb_msg::calibration_y(float cal_tof,int x_pix,int y_pix)
 {
-    if((cal_tof* LSB *1000) <= camera_dis)
-        return 0;
+//    if((cal_tof* LSB *1000) <= camera_dis)
+//        return 0;
 
-    float tofLSB = cal_tof/2.0 * LSB *1000;   //mm       ps:校正公式中的tof为接收到的真实TOF的一半    03-20 alter
-    float tmp1 = 4*tofLSB*tofLSB - camera_dis*camera_dis;
-    float tmp2 = 4*tofLSB*sqrt(pow(xf_position[x_pix]*miu_meter/f,2) + pow(yf_position[y_pix]*miu_meter/f,2) + 1 ) + 2*xf_position[x_pix]*miu_meter*camera_dis/f;
-    float y = tmp1/tmp2;
-    y = y/1000.0;   //mm->m
+//    float tofLSB = cal_tof/2.0 * LSB *1000;   //mm       ps:校正公式中的tof为接收到的真实TOF的一半    03-20 alter
+//    float tmp1 = 4*tofLSB*tofLSB - camera_dis*camera_dis;
+//    float tmp2 = 4*tofLSB*sqrt(pow(xf_position[x_pix]*miu_meter/f,2) + pow(yf_position[y_pix]*miu_meter/f,2) + 1 ) + 2*xf_position[x_pix]*miu_meter*camera_dis/f;
+//    float y = tmp1/tmp2;
+//    y = y/1000.0;   //mm->m
+//    return y;
+
+//    double k1 = 0.3411;
+//    double k2 = -1.4510;
+//    double p1 = 0;
+//    double p2 = 0;
+//    double fx = 169.7123;
+//    double fy = 162.7944;
+//    double cx = 80.5252;
+//    double cy = 59.9091;
+    float tofLSB = cal_tof/2.0 * LSB *1000;//mm       ps:校正公式中的tof为接收到的真实TOF的一半    03-20 alter
+    float tmp1 = pow(tofLSB,2);
+    float tmp2 = pow(x_pix-cx,2)/pow(fx,2) + pow(y_pix-cy,2)/pow(fy,2) + 1;
+
+    float y = sqrt(tmp1/tmp2)/1000.0;
     return y;
 
 }
@@ -991,8 +1047,7 @@ float DealUsb_msg::calibration_x(float cal_y,int x_pix,int y_pix)
 
 
     cal_y = cal_y * 1000;
-
-    float x = (x_pix-80.5252)*cal_y/169.7123;
+    float x = (x_pix-cx)*cal_y/fx;
     return x/1000.0;
 
 }
@@ -1012,8 +1067,7 @@ float DealUsb_msg::calibration_z(float cal_y,int x_pix,int y_pix)
 //    return z;
 
     cal_y = cal_y * 1000;
-
-    float z = (y_pix-59.9091)*cal_y/162.7944;
+    float z = (y_pix-cy)*cal_y/fy;
     return -z/1000.0;
 
 }
@@ -1218,7 +1272,17 @@ void DealUsb_msg::calibrate_offset_slot(int index,float mean_tof)
 {
     ishave_Four++;
 
-    float res_y_offset = calibration_real_dis - mean_tof;
+    float res_y_offset ;
+    if(mean_tof<1)
+    {
+        res_y_offset = 0;
+    }else
+    {
+         res_y_offset = calibration_real_dis - mean_tof;
+    }
+
+
+
     y_offset[index] = QString::number(res_y_offset);
     if(ishave_Four == 19200)
     {
@@ -1377,9 +1441,6 @@ void DealUsb_msg::readLocalPCDFile()
             mouseShowDepth[imgRow][imgCol] = temp_y;
             mouseShow_X[imgRow][imgCol] = temp_x;
             mouseShow_Z[imgRow][imgCol] = temp_z;
-
-
-
             mouseShowMutex.unlock();
 
 

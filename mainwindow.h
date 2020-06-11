@@ -18,6 +18,7 @@
 #include"rawdataui_dialog.h"
 #include"hist_ma_dialog.h"
 #include"calma_thread.h"
+#include"QFile"
 
 
 namespace Ui {
@@ -171,6 +172,12 @@ private slots:
     void on_black_rowAndCol_toolButton_clicked();
 
     void on_rawDatapushButton_clicked();
+
+    void on_autoCalibration_action_triggered();
+
+
+    /**************************/
+    void write_I2C_slot(QString addressStr,QString valueStr);
 
 signals:
     void rece_signal();

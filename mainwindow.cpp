@@ -42,8 +42,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-//    ui->RawData_action->setVisible(false);
-//    ui->Hist_MA_action->setVisible(false);
+    //    ui->RawData_action->setVisible(false);
+    //    ui->Hist_MA_action->setVisible(false);
 
     qRegisterMetaType<QVector<double>>("QVector<double>");   //注册函数
     qRegisterMetaType<QVector<int>>("QVector<int>");      //注册函数
@@ -168,7 +168,8 @@ void MainWindow::init_connect()   //信号与槽的初始化
     connect(this,SIGNAL(start_openUV910_signal(QString)),receUV910_obj,SLOT(on_openDevice_pushButton_clicked(QString)));
     connect(this,SIGNAL(stop_UV910_signal()),receUV910_obj,SLOT(CloseCamera()));
     connect(receUV910_obj,SIGNAL(link_UV910_return_signal(bool)),this,SLOT(link_UV910_return_slot(bool)));
-//    connect(this,SIGNAL(test_start()),receUV910_obj,SLOT(on_openDevice_pushButton_clicked()));
+    //    connect(this,SIGNAL(test_start()),receUV910_obj,SLOT(on_openDevice_pushButton_clicked()));
+    connect(receUV910_obj,&receUV910::write_I2C_integrate_signal,this,&MainWindow::write_I2C_slot);
 
     //统计帧率
     connect(&oneSec_timer,SIGNAL(timeout()),this,SLOT(oneSec_timer_slot()));
@@ -179,6 +180,7 @@ void MainWindow::init_connect()   //信号与槽的初始化
 
     //相机配置  修改相机焦距、积分次数、相机镜头间距
     connect(&cameraSetting_dia,SIGNAL(alter_focal_integrate_signal(float,float,int)),dealMsg_obj,SLOT(alter_focal_integrate_slot(float,float,int)));
+    connect(&cameraSetting_dia,&CameraSetting_Dialog::write_I2C_integrate_signal,this,&MainWindow::write_I2C_slot);
 
 
     //DCR 测量相关
@@ -324,7 +326,7 @@ void MainWindow::queryPixel_showToolTip_slot(int x,int y)
 
     int y_index = y/height_scale;
     int x_index = x/width_scale;
-//    qDebug()<<"y_index="<<y_index<<"  x_index ="<<x_index;
+    //    qDebug()<<"y_index="<<y_index<<"  x_index ="<<x_index;
     int index = 160*y_index + x_index;
     mouseShowMutex.lock();
     QString str= "x="+QString::number(x_index)+",y="+QString::number(y_index)+",tof="+QString::number(mouseShowTOF[x_index][y_index])+",peak="+QString::number(mouseShowPEAK[x_index][y_index])+
@@ -349,28 +351,28 @@ void MainWindow::Display_log_slot(QString str)
 
 
     //获取积分次数
-//    QString regStr1 = "07";
-//    QString regStr2 = "08";
-//    int iRet = 0;
-//    UINT uAddr = ui->I2C_addr_lineEdit->text().toInt(NULL,16);
-//    UINT uReg;
-//    USHORT uValue_high,uValue_low;
+    //    QString regStr1 = "07";
+    //    QString regStr2 = "08";
+    //    int iRet = 0;
+    //    UINT uAddr = ui->I2C_addr_lineEdit->text().toInt(NULL,16);
+    //    UINT uReg;
+    //    USHORT uValue_high,uValue_low;
 
-//    uReg = regStr1.toInt(NULL,16);
-//    iRet = ReadSensorReg(uAddr,uReg,&uValue_high,0,m_nDevID);
-//    if(iRet != DT_ERROR_OK)
-//    {
-//        QMessageBox::warning(NULL,QStringLiteral("提示"),QStringLiteral("读取I2C,reg:07出错!"));
-//        return;
-//    }
+    //    uReg = regStr1.toInt(NULL,16);
+    //    iRet = ReadSensorReg(uAddr,uReg,&uValue_high,0,m_nDevID);
+    //    if(iRet != DT_ERROR_OK)
+    //    {
+    //        QMessageBox::warning(NULL,QStringLiteral("提示"),QStringLiteral("读取I2C,reg:07出错!"));
+    //        return;
+    //    }
 
-//    uReg = regStr2.toInt(NULL,16);
-//    iRet = ReadSensorReg(uAddr,uReg,&uValue_low,0,m_nDevID);
-//    if(iRet != DT_ERROR_OK)
-//    {
-//        QMessageBox::warning(NULL,QStringLiteral("提示"),QStringLiteral("读取I2C,reg:08出错!"));
-//    }
-//    int jifen_number = uValue;
+    //    uReg = regStr2.toInt(NULL,16);
+    //    iRet = ReadSensorReg(uAddr,uReg,&uValue_low,0,m_nDevID);
+    //    if(iRet != DT_ERROR_OK)
+    //    {
+    //        QMessageBox::warning(NULL,QStringLiteral("提示"),QStringLiteral("读取I2C,reg:08出错!"));
+    //    }
+    //    int jifen_number = uValue;
 
 
 }
@@ -464,15 +466,22 @@ void MainWindow::isSaveFlagSlot(bool flag,QString filePath,int fileFormat)
 {
 
 
-   isSaveFlag = flag;        //是否进行存储
-   saveFilePath = filePath;   //保存的路径  E:/..../.../的形式
-   saveFileIndex = 1;      //文件标号；1作为开始
+    isSaveFlag = flag;        //是否进行存储
+    saveFilePath = filePath;   //保存的路径  E:/..../.../的形式
+    saveFileIndex = 1;      //文件标号；1作为开始
 }
 
 //!
 //! \brief MainWindow::on_AutoCalibration_action_triggered
 //! 自动校准的窗口
 void MainWindow::on_AutoCalibration_action_triggered()
+{
+    autoCalibration_dia.setModal(true);
+    autoCalibration_dia.show();
+}
+
+
+void MainWindow::on_autoCalibration_action_triggered()
 {
     autoCalibration_dia.setModal(true);
     autoCalibration_dia.show();
@@ -580,7 +589,7 @@ void MainWindow::rece_oneFrame_slot()
 //!显示帧率的槽函数
 void MainWindow::oneSec_timer_slot()
 {
-//    qDebug()<<"fps = "<<frameCount;
+    //    qDebug()<<"fps = "<<frameCount;
 
     QString fpsStr = "fps:"+QString::number(frameCount);
     fpsLabel.setText(fpsStr);
@@ -949,15 +958,15 @@ bool MainWindow::OpenCamera()
 
 
 
-//    return true;
+    //    return true;
     qDebug()<<"slaveId="<<CurrentSensor.SlaveID<<"   ParaList="<<CurrentSensor.ParaList<<"  ParaListSize="<<CurrentSensor.ParaListSize<<"  CurrentSensor.mode"<<CurrentSensor.mode<<"  m_nDevID="<<m_nDevID;
     if(InitSensor(CurrentSensor.SlaveID,
                   CurrentSensor.ParaList,
                   CurrentSensor.ParaListSize,
                   CurrentSensor.mode,m_nDevID) != DT_ERROR_OK)
     {
-//        CloseCamera();
-//        return false;
+        //        CloseCamera();
+        //        return false;
         qDebug()<<"InitSensor function() error!";
 
     }
@@ -1028,54 +1037,54 @@ bool MainWindow::OpenCamera()
     SetSaturation(128, m_nDevID);//Saturation: default 128 is no saturation change...
     SetDigitalGain(1.0, 1.0, 1.0, m_nDevID); //AWB digital gian R G B
 #endif
-//    unsigned long RetSize = 0;
-//    FrameInfo m_FrameInfo;
-//    int width=CurrentSensor.width;
-//    int height=CurrentSensor.height;
-//    unsigned char *m_bufferRaw=new unsigned char[width*height*3];
-//    int bRet = GrabFrame(m_bufferRaw, m_GrabSize,&RetSize,&m_FrameInfo,m_nDevID);
+    //    unsigned long RetSize = 0;
+    //    FrameInfo m_FrameInfo;
+    //    int width=CurrentSensor.width;
+    //    int height=CurrentSensor.height;
+    //    unsigned char *m_bufferRaw=new unsigned char[width*height*3];
+    //    int bRet = GrabFrame(m_bufferRaw, m_GrabSize,&RetSize,&m_FrameInfo,m_nDevID);
 
-//    /// @retval DT_ERROR_OK：采集一帧图像成功
-//    /// @retval DT_ERROR_FAILD：采集一帧图像失败，可能不是完整的一帧图像数据
-//    /// @retval DT_ERROR_TIME_OUT：采集超时
-//    /// @retval DT_ERROR_INTERNAL_ERROR：内部错误
-////    if(bRet == DT_ERROR_FAILD)
-////    {
-////        qDebug()<<"DT_ERROR_FAILD：采集一帧图像失败，可能不是完整的一帧图像数据";
-////    }else
-//    if(bRet == DT_ERROR_TIME_OUT)
-//    {
-//        qDebug()<<"DT_ERROR_TIME_OUT：采集超时";
-//    }else if(bRet == DT_ERROR_INTERNAL_ERROR)
-//    {
-//        qDebug()<<"DT_ERROR_INTERNAL_ERROR：内部错误";
-//    }
+    //    /// @retval DT_ERROR_OK：采集一帧图像成功
+    //    /// @retval DT_ERROR_FAILD：采集一帧图像失败，可能不是完整的一帧图像数据
+    //    /// @retval DT_ERROR_TIME_OUT：采集超时
+    //    /// @retval DT_ERROR_INTERNAL_ERROR：内部错误
+    ////    if(bRet == DT_ERROR_FAILD)
+    ////    {
+    ////        qDebug()<<"DT_ERROR_FAILD：采集一帧图像失败，可能不是完整的一帧图像数据";
+    ////    }else
+    //    if(bRet == DT_ERROR_TIME_OUT)
+    //    {
+    //        qDebug()<<"DT_ERROR_TIME_OUT：采集超时";
+    //    }else if(bRet == DT_ERROR_INTERNAL_ERROR)
+    //    {
+    //        qDebug()<<"DT_ERROR_INTERNAL_ERROR：内部错误";
+    //    }
 
-//    qDebug()<<bRet;
-//    qDebug()<<RetSize;
+    //    qDebug()<<bRet;
+    //    qDebug()<<RetSize;
 
 
-//    unsigned char *m_pDisplayBuffer=new unsigned char[width*height*3];
-//    ImageProcess(m_bufferRaw, m_pDisplayBuffer,m_FrameInfo.uWidth, m_FrameInfo.uHeight, &m_FrameInfo,m_nDevID);
-//    qDebug()<<CurrentSensor.width;
-//    qDebug()<<CurrentSensor.height;
-//    QImage image(m_pDisplayBuffer, CurrentSensor.width, CurrentSensor.height, QImage::Format_RGB888);
-//    QImage mirroredImage = image.mirrored(true, true);//图像翻转
-//    // image.convertToFormat(QImage::Format_RGB32);
-//    QPixmap pix = QPixmap::fromImage(mirroredImage);
+    //    unsigned char *m_pDisplayBuffer=new unsigned char[width*height*3];
+    //    ImageProcess(m_bufferRaw, m_pDisplayBuffer,m_FrameInfo.uWidth, m_FrameInfo.uHeight, &m_FrameInfo,m_nDevID);
+    //    qDebug()<<CurrentSensor.width;
+    //    qDebug()<<CurrentSensor.height;
+    //    QImage image(m_pDisplayBuffer, CurrentSensor.width, CurrentSensor.height, QImage::Format_RGB888);
+    //    QImage mirroredImage = image.mirrored(true, true);//图像翻转
+    //    // image.convertToFormat(QImage::Format_RGB32);
+    //    QPixmap pix = QPixmap::fromImage(mirroredImage);
 
-//    const char* path;
-//    path = "E:\\right.bmp";
-//    mirroredImage.save(path,0);//保存图片
+    //    const char* path;
+    //    path = "E:\\right.bmp";
+    //    mirroredImage.save(path,0);//保存图片
 
-//    ui->label->setPixmap(pix);
-//    //ui->openGLWidget->setParent(pix);
-//    m_RunMode=RUNMODE_PLAY;
-//    delete m_pDisplayBuffer;
-//    delete m_bufferRaw;
-//    m_bufferRaw=nullptr;
-//    m_pDisplayBuffer=nullptr;
-//    emit GetPmuCurrent();
+    //    ui->label->setPixmap(pix);
+    //    //ui->openGLWidget->setParent(pix);
+    //    m_RunMode=RUNMODE_PLAY;
+    //    delete m_pDisplayBuffer;
+    //    delete m_bufferRaw;
+    //    m_bufferRaw=nullptr;
+    //    m_pDisplayBuffer=nullptr;
+    //    emit GetPmuCurrent();
 
 
     oneSec_timer.start(1000);
@@ -1096,7 +1105,7 @@ void MainWindow::on_newFrame_pushButton_clicked()
 
     QByteArray array ;
     QByteArray ba((char*)m_bufferRaw, RetSize);
-//    qDebug()<<ba.left(300);
+    //    qDebug()<<ba.left(300);
 
 
     QString sFilePath = "E:/000.txt";
@@ -1120,7 +1129,7 @@ void MainWindow::on_newFrame_pushButton_clicked()
     }
 
     //    ba.toHex()
-        qDebug()<<"--------------------test = "<<text.left(200);
+    qDebug()<<"--------------------test = "<<text.left(200);
     QTextStream out(&file);
     QTextStream out2(&tenfile);
     out<<file_to_write<<endl;
@@ -1132,26 +1141,26 @@ void MainWindow::on_newFrame_pushButton_clicked()
 
 
 
-//    unsigned char *m_pDisplayBuffer=new unsigned char[width*height*3];
-//    ImageProcess(m_bufferRaw, m_pDisplayBuffer,m_FrameInfo.uWidth, m_FrameInfo.uHeight, &m_FrameInfo,m_nDevID);
-//    qDebug()<<CurrentSensor.width;
-//    qDebug()<<CurrentSensor.height;
-//    QImage image(m_pDisplayBuffer, CurrentSensor.width, CurrentSensor.height, QImage::Format_RGB888);
-//    QImage mirroredImage = image.mirrored(true, true);//图像翻转
-//     image.convertToFormat(QImage::Format_RGB32);
-//    QPixmap pix = QPixmap::fromImage(mirroredImage);
+    //    unsigned char *m_pDisplayBuffer=new unsigned char[width*height*3];
+    //    ImageProcess(m_bufferRaw, m_pDisplayBuffer,m_FrameInfo.uWidth, m_FrameInfo.uHeight, &m_FrameInfo,m_nDevID);
+    //    qDebug()<<CurrentSensor.width;
+    //    qDebug()<<CurrentSensor.height;
+    //    QImage image(m_pDisplayBuffer, CurrentSensor.width, CurrentSensor.height, QImage::Format_RGB888);
+    //    QImage mirroredImage = image.mirrored(true, true);//图像翻转
+    //     image.convertToFormat(QImage::Format_RGB32);
+    //    QPixmap pix = QPixmap::fromImage(mirroredImage);
 
-//    const char* path;
-//    path = "E:\\right.bmp";
-//    image.save(path,0);//保存图片
+    //    const char* path;
+    //    path = "E:\\right.bmp";
+    //    image.save(path,0);//保存图片
 
-//    ui->label_2->setPixmap(pix);
-//    //ui->openGLWidget->setParent(pix);
-//    m_RunMode=RUNMODE_PLAY;
-//    delete m_pDisplayBuffer;
-//    delete m_bufferRaw;
-//    m_bufferRaw=nullptr;
-//    m_pDisplayBuffer=nullptr;
+    //    ui->label_2->setPixmap(pix);
+    //    //ui->openGLWidget->setParent(pix);
+    //    m_RunMode=RUNMODE_PLAY;
+    //    delete m_pDisplayBuffer;
+    //    delete m_bufferRaw;
+    //    m_bufferRaw=nullptr;
+    //    m_pDisplayBuffer=nullptr;
 
 }
 
@@ -1352,10 +1361,10 @@ void MainWindow::Load()
 {
     //  QMessageBox::information(this, "warning", "showimage", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
-//        QString fileName=QFileDialog::getOpenFileName();
+    //        QString fileName=QFileDialog::getOpenFileName();
 
-//    ui->initFilePath_lineEdit->setText(iniFile_path);
-//    QString fileName = "C:/Users/wenting.zhang/Desktop/FPGA.ini";
+    //    ui->initFilePath_lineEdit->setText(iniFile_path);
+    //    QString fileName = "C:/Users/wenting.zhang/Desktop/FPGA.ini";
 
     QString fileName =  ui->initFilePath_lineEdit->text();
     qDebug() << "filename = "<<fileName;
@@ -1413,7 +1422,7 @@ void MainWindow::Load()
     CurrentSensor.Ext0 = (UINT)sensorIniFile.value("Sensor/Ext0").toInt(&isChangeOK);
     CurrentSensor.Ext1 = (UINT)sensorIniFile.value("Sensor/Ext1").toInt(&isChangeOK);
     CurrentSensor.Ext2 = (UINT)sensorIniFile.value("Sensor/Ext2").toInt(&isChangeOK);
-//    bloadIniFile(fileName);
+    //    bloadIniFile(fileName);
 }
 
 
@@ -1424,6 +1433,14 @@ void MainWindow::Load()
 void MainWindow::on_openDevice_pushButton_clicked()
 {
     QString filePath = ui->initFilePath_lineEdit->text();
+
+
+    QFileInfo fileInfo(filePath);
+    if(!fileInfo.isFile())
+    {
+        QMessageBox::warning(NULL,QStringLiteral("提示"),QStringLiteral("文件路径错误，请重新选择!"));
+        return ;
+    }
 
 
     if(QStringLiteral("打开") == ui->openDevice_pushButton->text())
@@ -1535,8 +1552,23 @@ void MainWindow::on_I2C_write_pushButton_clicked()
     }
     QString str_log = "[Write I2C]:I2C_addr="+QString("%1").arg(uAddr,2,16,QChar('0')).toUpper() + ",Reg="+QString("%1").arg(uReg,2,16,QChar('0')).toUpper() + ",Value="+QString("%1").arg(uValue,2,16,QChar('0')).toUpper();
     Display_log_slot(str_log);
+}
 
 
+//写入I2C的槽函数
+void MainWindow::write_I2C_slot(QString addressStr,QString valueStr)
+{
+
+    qDebug()<<"write_I2C_slot: address = "<<addressStr<<"  valueStr="<<valueStr;
+    UINT uAddr = ui->I2C_addr_lineEdit->text().toInt(NULL,16);
+    UINT uReg = addressStr.toInt(NULL,16);
+    UINT uValue = valueStr.toInt(NULL,16);
+
+    if (WriteSensorReg(uAddr, uReg, uValue, 0, m_nDevID) == FALSE)
+    {
+        QMessageBox::warning(NULL,QStringLiteral("提示"),QStringLiteral("写入I2C出错!"));
+        return;
+    }
 }
 
 
@@ -1546,7 +1578,7 @@ void MainWindow::on_I2C_write_pushButton_clicked()
 //! 按键
 void MainWindow::keyPressEvent(QKeyEvent *e)
 {
-    qDebug()<<"key num = "<<e->key();
+    //    qDebug()<<"key num = "<<e->key();
     if(90 == e->key())
     {
         ui->groupBox_5->setVisible(true);
@@ -1589,8 +1621,8 @@ void MainWindow::on_kalmanPara_lineEdit_returnPressed()
 //平均时候的阈值
 void MainWindow::on_meanTof_offset_lineEdit_returnPressed()
 {
-//    float meanTof_offset = ui->meanTof_offset_lineEdit->text().toFloat();
-//    dealMsg_obj->meanFilter_offset = meanTof_offset;
+    //    float meanTof_offset = ui->meanTof_offset_lineEdit->text().toFloat();
+    //    dealMsg_obj->meanFilter_offset = meanTof_offset;
 }
 
 ///*****************DCR测试暗计数相关***********************************/
@@ -1600,8 +1632,8 @@ void MainWindow::on_balckileSave_toolButton_clicked()
     QString file_path = QFileDialog::getExistingDirectory(this,QStringLiteral("请选择文件保存路径..."),"./");
     if(file_path.isEmpty())
     {
-       qDebug()<<QStringLiteral("没有选择路径")<<endl;
-       QMessageBox::information(NULL,QStringLiteral("告警"),QStringLiteral("保存路径不能为空"));
+        qDebug()<<QStringLiteral("没有选择路径")<<endl;
+        QMessageBox::information(NULL,QStringLiteral("告警"),QStringLiteral("保存路径不能为空"));
         return;
     }
     else
@@ -1750,3 +1782,5 @@ void MainWindow::on_rawDatapushButton_clicked()
 {
     dealMsg_obj->UV910_RawData_deal_slot("");
 }
+
+

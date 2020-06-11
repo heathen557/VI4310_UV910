@@ -40,6 +40,31 @@ void CameraSetting_Dialog::on_ok_pushButton_clicked()
     float tx_rx_camera_diff = ui->camera_diff_lineEdit->text().toFloat();     //tx /rx 间距
     int integrate_num = ui->integrate_number_lineEdit->text().toInt();             //积分次数
 
+    if(integrate_num>4095)
+    {
+        QMessageBox::information(NULL,QStringLiteral("提示"),QStringLiteral("设置的积分次数过大，请重新输入！"));
+        return;
+    }
+
+
+    //  积分次数 需要写入寄存器
+    QString integrateStr = QString("%1").arg(integrate_num,3,16,QChar('0')).toUpper();
+    qDebug()<<"integrateStr = "<<integrateStr;
+    QString highByte = integrateStr.mid(0,1) + "0";
+    QString lowByte = integrateStr.mid(1,2);
+    qDebug()<<"highByte="<<highByte<<"  lowByte="<<lowByte;
+
+    QString addressStr = "07";
+    emit write_I2C_integrate_signal(addressStr,lowByte);
+    Sleep(10);
+    addressStr = "08";
+    emit write_I2C_integrate_signal(addressStr,highByte);
+
+
+
+
+
+
     emit alter_focal_integrate_signal(focal_length_float,tx_rx_camera_diff,integrate_num);     //焦距 和 TX-RX间距 积分次数
 
     QSettings configSetting("setting.ini", QSettings::IniFormat);

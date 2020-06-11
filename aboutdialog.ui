@@ -30,20 +30,40 @@
     <string notr="true">font: 14pt &quot;Agency FB&quot;;</string>
    </property>
    <property name="text">
-    <string>版本信息：V1.4    （04-08）</string>
+    <string>版本信息：V5.0(2020-06-04)</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
      <x>80</x>
-     <y>140</y>
+     <y>90</y>
      <width>391</width>
-     <height>81</height>
+     <height>41</height>
     </rect>
    </property>
    <property name="text">
-    <string>1、已经修过内参、畸变校正的版本（0529）</string>
+    <string>1、根据畸变校正，修正了X,Y,Z的计算公式</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>140</y>
+     <width>511</width>
+     <height>141</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>2、畸变系数，从本地文件Setting.ini文件中获取：[camera_calibration]：
+fx
+fy
+cx
+cy
+k1
+k2
+</string>
    </property>
   </widget>
  </widget>

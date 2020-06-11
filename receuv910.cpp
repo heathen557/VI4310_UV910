@@ -784,6 +784,23 @@ void receUV910::on_openDevice_pushButton_clicked(QString filePath)
 
 
 
+    //初始化设备以后，根据配置文件设置积分次数
+    Sleepms(10);
+    QSettings configSetting("setting.ini", QSettings::IniFormat);
+    int integrate_num = configSetting.value("camera/integrate_num").toInt();
+
+    QString integrateStr = QString("%1").arg(integrate_num,3,16,QChar('0')).toUpper();
+    qDebug()<<"integrateStr = "<<integrateStr;
+    QString highByte = integrateStr.mid(0,1) + "0";
+    QString lowByte = integrateStr.mid(1,2);
+    qDebug()<<"highByte="<<highByte<<"  lowByte="<<lowByte;
+
+    QString addressStr = "07";
+    emit write_I2C_integrate_signal(addressStr,lowByte);
+    Sleepms(10);
+    addressStr = "08";
+    emit write_I2C_integrate_signal(addressStr,highByte);
+
 }
 
 bool receUV910::bloadIniFile(QString sFile)

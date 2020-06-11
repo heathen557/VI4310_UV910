@@ -42,6 +42,10 @@ signals:
     //rowData MA 信号
     void UV910_RawData_MA_deal_signal(QByteArray);
 
+
+    //写I2C 的 信号
+    void write_I2C_integrate_signal(QString,QString);
+
 public slots:
 
     void receUV910_data_slot();

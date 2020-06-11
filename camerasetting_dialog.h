@@ -3,6 +3,9 @@
 
 #include <QDialog>
 #include<QSettings>
+#include<QDebug>
+#include<Windows.h>
+#include<QMessageBox>
 
 namespace Ui {
 class CameraSetting_Dialog;
@@ -27,6 +30,8 @@ private:
 
 signals:
     void alter_focal_integrate_signal(float,float,int);   //修改焦距、积分次数的槽函数
+
+    void write_I2C_integrate_signal(QString,QString);
 };
 
 #endif // CAMERASETTING_DIALOG_H

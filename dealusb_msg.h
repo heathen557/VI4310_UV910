@@ -129,6 +129,12 @@ public:
     //畸变校正相关
     float undistorted_tof[160][120];
     float undistorted_peak[160][120];
+    float fx;
+    float fy;
+    float cx;
+    float cy;
+    float k1;
+    float k2;
 
 signals:
     void staticValueSignal(float,float,float,float,float,float,float,float,float,float);
@@ -185,7 +191,8 @@ public slots:
 };
 
 
-static double colormap[1024*3]={
+static double colormap[1025*3]={
+         0,  0,129,
          0,  0,129,
          0,  0,130,
          0,  0,131,
