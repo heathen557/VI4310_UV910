@@ -3,6 +3,8 @@
 
 extern int exposure_num;            //曝光次数
 
+#define holdOffste 800
+
 Hist_MA_Dialog::Hist_MA_Dialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Hist_MA_Dialog)
@@ -12,7 +14,15 @@ Hist_MA_Dialog::Hist_MA_Dialog(QWidget *parent) :
     selectRow = 59;
     selectCol = 79;
     summary = 0;
-    channelNum = 1;   //默认采用1个通道
+    channelNum = 4;   //默认采用4个通道
+
+    TDC_min = 0;
+    TDC_max = binSize;
+    ui->TDC_min_lineEdit->setText(QString::number(TDC_min));
+    ui->TDC_max_lineEdit->setText(QString::number(TDC_max));
+
+
+    ui->channels_comboBox->setCurrentIndex(3);
     init_UI();
     init_histogram();
     connect(&filterWin_dia,SIGNAL(send_filterWindow_signal(QStringList)),this,SLOT(send_filterWindow_slot(QStringList)));
@@ -71,18 +81,18 @@ void Hist_MA_Dialog::send_filterWindow_slot(QStringList valueList)
 //初始化界面控件相关
 void Hist_MA_Dialog::init_UI()
 {
-    //单个pixel的行、列的初始化
-    for(int row=0; row<120; row++)
-    {
-        ui->channel_1_row_comboBox->addItem(QString::number(row));
-    }
-    ui->channel_1_row_comboBox->setCurrentIndex(59);
+//    //单个pixel的行、列的初始化
+//    for(int row=0; row<120; row++)
+//    {
+//        ui->channel_1_row_comboBox->addItem(QString::number(row));
+//    }
+//    ui->channel_1_row_comboBox->setCurrentIndex(59);
 
-    for(int col=0;col<160;col++)
-    {
-        ui->channel_1_col_comboBox->addItem(QString::number(col));
-    }
-    ui->channel_1_col_comboBox->setCurrentIndex(79);
+//    for(int col=0;col<160;col++)
+//    {
+//        ui->channel_1_col_comboBox->addItem(QString::number(col));
+//    }
+//    ui->channel_1_col_comboBox->setCurrentIndex(79);
 
 
     //binning 的行、列的初始化
@@ -100,6 +110,16 @@ void Hist_MA_Dialog::init_UI()
         ui->channel3_bin_col_comboBox->addItem(QString::number(j));
         ui->channel4_bin_col_comboBox->addItem(QString::number(j));
     }
+
+}
+
+//!
+//! \brief Hist_MA_Dialog::sendFrameIndex_slot
+//!接收到多少帧数据
+void Hist_MA_Dialog::sendFrameIndex_slot(int frameIndex)
+{
+    int frameCount = frameIndex * 20 ;
+    ui->currentExposureNum_label->setText(QString::number(frameCount));
 
 }
 
@@ -494,7 +514,19 @@ void Hist_MA_Dialog::on_channels_comboBox_currentIndexChanged(const QString &arg
         ui->MA_groupBox_2->setVisible(true);
         ui->MA_groupBox_3->setVisible(false);
         ui->MA_groupBox_4->setVisible(false);
-    }else if(4 == channelNum)
+    }else if(3 == channelNum)
+    {
+        ui->binning_groupBox_1->setVisible(true);
+        ui->binning_groupBox_2->setVisible(true);
+        ui->binning_groupBox_3->setVisible(true);
+        ui->binning_groupBox_4->setVisible(false);
+
+        ui->MA_groupBox_1->setVisible(true);
+        ui->MA_groupBox_2->setVisible(true);
+        ui->MA_groupBox_3->setVisible(true);
+        ui->MA_groupBox_4->setVisible(false);
+    }
+    else if(4 == channelNum)
     {
         ui->binning_groupBox_1->setVisible(true);
         ui->binning_groupBox_2->setVisible(true);
@@ -511,8 +543,38 @@ void Hist_MA_Dialog::on_channels_comboBox_currentIndexChanged(const QString &arg
 
 
 //显示直方图  、 同时计算并显示MA曲线
+// 1、统计 holdValue 占总点数的个数 ：hold值的个数 = 大于800的个数    总点的个数
+// 2、
 void Hist_MA_Dialog::toShowHistogram_channel1_slot(QVector<double> histogram_vec,int maxValue)
 {
+    //统计hold占比
+    float allPointsNum = 0;
+    float holdValueNum = 0;
+    for(int i=0; i<histogram_vec.size(); i++)
+    {
+        allPointsNum += histogram_vec[i];
+        if(i>holdOffste)
+        {
+            holdValueNum += histogram_vec[i];
+        }
+
+        // 筛选 TDC_min -> TDC_max的数据
+        if(i<TDC_min)
+        {
+            histogram_vec[i] = 0;
+        }
+        if(i>TDC_max)
+        {
+            histogram_vec[i] = 0;
+        }
+
+    }
+    float holdRatio = holdValueNum/allPointsNum;
+    ui->hold1_label->setText(QString::number(holdRatio,'f',2));
+
+
+
+
     QVector<double> showHistogram_vec;
     showHistogram_vec = histogram_vec;
     showHistogram_vec.resize(binSize);
@@ -580,6 +642,32 @@ void Hist_MA_Dialog::toShowHistogram_channel1_slot(QVector<double> histogram_vec
 //! 2 channel 的MA
 void  Hist_MA_Dialog::toShowHistogram_channel2_slot(QVector<double> histogram_vec,int maxValue)
 {
+    //统计hold占比
+    float allPointsNum = 0;
+    float holdValueNum = 0;
+    for(int i=0; i<histogram_vec.size(); i++)
+    {
+        allPointsNum += histogram_vec[i];
+        if(i>holdOffste)
+        {
+            holdValueNum += histogram_vec[i];
+        }
+
+        // 筛选 TDC_min -> TDC_max的数据
+        if(i<TDC_min)
+        {
+            histogram_vec[i] = 0;
+        }
+        if(i>TDC_max)
+        {
+            histogram_vec[i] = 0;
+        }
+    }
+    float holdRatio = holdValueNum/allPointsNum;
+    ui->hold2_label->setText(QString::number(holdRatio,'f',2));
+
+
+
     QVector<double> showHistogram_vec;
     showHistogram_vec = histogram_vec;
     showHistogram_vec.resize(binSize);
@@ -646,6 +734,32 @@ void  Hist_MA_Dialog::toShowHistogram_channel2_slot(QVector<double> histogram_ve
 //! 3channel 的 MA
 void Hist_MA_Dialog::toShowHistogram_channel3_slot(QVector<double> histogram_vec,int maxValue)
 {
+    //统计hold占比
+    float allPointsNum = 0;
+    float holdValueNum = 0;
+    for(int i=0; i<histogram_vec.size(); i++)
+    {
+        allPointsNum += histogram_vec[i];
+        if(i>holdOffste)
+        {
+            holdValueNum += histogram_vec[i];
+        }
+
+
+        // 筛选 TDC_min -> TDC_max的数据
+        if(i<TDC_min)
+        {
+            histogram_vec[i] = 0;
+        }
+        if(i>TDC_max)
+        {
+            histogram_vec[i] = 0;
+        }
+    }
+    float holdRatio = holdValueNum/allPointsNum;
+    ui->hold3_label->setText(QString::number(holdRatio,'f',2));
+
+
     QVector<double> showHistogram_vec;
     showHistogram_vec = histogram_vec;
     showHistogram_vec.resize(binSize);
@@ -712,6 +826,32 @@ void Hist_MA_Dialog::toShowHistogram_channel3_slot(QVector<double> histogram_vec
 //! 4 Channel 的MA
 void Hist_MA_Dialog::toShowHistogram_channel4_slot(QVector<double> histogram_vec,int maxValue)
 {
+    //统计hold占比
+    float allPointsNum = 0;
+    float holdValueNum = 0;
+    for(int i=0; i<histogram_vec.size(); i++)
+    {
+        allPointsNum += histogram_vec[i];
+        if(i>holdOffste)
+        {
+            holdValueNum += histogram_vec[i];
+        }
+
+
+        // 筛选 TDC_min -> TDC_max的数据
+        if(i<TDC_min)
+        {
+            histogram_vec[i] = 0;
+        }
+        if(i>TDC_max)
+        {
+            histogram_vec[i] = 0;
+        }
+    }
+    float holdRatio = holdValueNum/allPointsNum;
+    ui->hold4_label->setText(QString::number(holdRatio,'f',2));
+
+
     QVector<double> showHistogram_vec;
     showHistogram_vec = histogram_vec;
     showHistogram_vec.resize(binSize);
@@ -802,6 +942,11 @@ void Hist_MA_Dialog::on_start_pushButton_clicked()
 //!  开始进行binning 直方图显示
 void Hist_MA_Dialog::on_bin_start_pushButton_clicked()
 {
+    // 清空已有的数据
+    ui->currentExposureNum_label->setText("0");
+    emit clearHistogram_signal();
+
+
 //  开启binning rawData测试  曝光次数，积分次数，初始行、初始列、 窗口大小（2、4）
     exposure_num = ui->exposure_num_lineEdit->text().toInt();
     int integration_num = ui->IntegrationTime_lineEdit->text().toInt();
@@ -853,3 +998,205 @@ void Hist_MA_Dialog::on_bin_start_pushButton_clicked()
 }
 
 
+//!
+//! \brief Hist_MA_Dialog::on_TDC_min_lineEdit_returnPressed
+//!TDC_min
+void Hist_MA_Dialog::on_TDC_min_lineEdit_returnPressed()
+{
+    TDC_min = ui->TDC_min_lineEdit->text().toInt();
+    qDebug()<<"TDC_min = "<<TDC_min;
+}
+
+// TDC_max
+void Hist_MA_Dialog::on_TDC_max_lineEdit_returnPressed()
+{
+    TDC_max = ui->TDC_max_lineEdit->text().toInt();
+    qDebug()<<"TDC_max = "<<TDC_max;
+}
+
+//save MA1
+void Hist_MA_Dialog::on_save_MA1_pushButton_clicked()
+{
+    QString filePath;
+    QFileDialog *fileDialog = new QFileDialog(this);//创建一个QFileDialog对象，构造函数中的参数可以有所添加。
+    fileDialog->setWindowTitle(tr("Save As"));//设置文件保存对话框的标题
+    fileDialog->setAcceptMode(QFileDialog::AcceptSave);//设置文件对话框为保存模式
+    fileDialog->setFileMode(QFileDialog::AnyFile);//设置文件对话框弹出的时候显示任何文件，不论是文件夹还是文件
+    fileDialog->setViewMode(QFileDialog::Detail);//文件以详细的形式显示，显示文件名，大小，创建日期等信息；
+    fileDialog->setGeometry(10,30,300,200);//设置文件对话框的显示位置
+    fileDialog->setDirectory(".");//设置文件对话框打开时初始打开的位置
+    QStringList mimeTypeFilters;
+//    mimeTypeFilters <<"(*.bmp)|*.bmp|JPEG(*.jpg)|*.jpg;|Png(*.png)|*.png" ;
+    mimeTypeFilters<<"bmp(*.bmp)|*.bmp"<<"JPEG(*.jpg)|*.jpg"<<"Png(*.png)|*.png"<<"PDF(*.pdf)|*.pdf";
+    fileDialog->setNameFilters(mimeTypeFilters);
+
+
+    if(fileDialog->exec() == QDialog::Accepted)
+    {
+        filePath = fileDialog->selectedFiles()[0];//得到用户选择的文件名
+        qDebug()<<" filePath = "<<filePath<<endl;
+        QString formatStr = filePath.right(3);
+        //保存直方图
+        if("bmp" == formatStr)
+        {
+            ui->MA_1_widget->saveBmp(filePath.toLatin1().data());
+
+        }else if("jpg" == formatStr)
+        {
+            ui->MA_1_widget->saveJpg(filePath.toLatin1().data());
+        }else if("png" == formatStr)
+        {
+            ui->MA_1_widget->savePng(filePath.toLatin1().data());
+        }else if("pdf" == formatStr)
+        {
+            ui->MA_1_widget->savePdf(filePath.toLatin1().data());
+        }
+
+        QString strMsg = QStringLiteral("图片已经保存至：") +filePath;
+        QMessageBox::information(NULL,QStringLiteral("提示"),strMsg);
+
+    }else
+    {
+        return ;
+    }
+}
+
+//save MA2
+void Hist_MA_Dialog::on_save_MA2_pushButton_clicked()
+{
+    QString filePath;
+    QFileDialog *fileDialog = new QFileDialog(this);//创建一个QFileDialog对象，构造函数中的参数可以有所添加。
+    fileDialog->setWindowTitle(tr("Save As"));//设置文件保存对话框的标题
+    fileDialog->setAcceptMode(QFileDialog::AcceptSave);//设置文件对话框为保存模式
+    fileDialog->setFileMode(QFileDialog::AnyFile);//设置文件对话框弹出的时候显示任何文件，不论是文件夹还是文件
+    fileDialog->setViewMode(QFileDialog::Detail);//文件以详细的形式显示，显示文件名，大小，创建日期等信息；
+    fileDialog->setGeometry(10,30,300,200);//设置文件对话框的显示位置
+    fileDialog->setDirectory(".");//设置文件对话框打开时初始打开的位置
+    QStringList mimeTypeFilters;
+//    mimeTypeFilters <<"(*.bmp)|*.bmp|JPEG(*.jpg)|*.jpg;|Png(*.png)|*.png" ;
+    mimeTypeFilters<<"bmp(*.bmp)|*.bmp"<<"JPEG(*.jpg)|*.jpg"<<"Png(*.png)|*.png"<<"PDF(*.pdf)|*.pdf";
+    fileDialog->setNameFilters(mimeTypeFilters);
+
+
+    if(fileDialog->exec() == QDialog::Accepted)
+    {
+        filePath = fileDialog->selectedFiles()[0];//得到用户选择的文件名
+        qDebug()<<" filePath = "<<filePath<<endl;
+        QString formatStr = filePath.right(3);
+        //保存直方图
+        if("bmp" == formatStr)
+        {
+            ui->MA_2_widget->saveBmp(filePath.toLatin1().data());
+
+        }else if("jpg" == formatStr)
+        {
+            ui->MA_2_widget->saveJpg(filePath.toLatin1().data());
+        }else if("png" == formatStr)
+        {
+            ui->MA_2_widget->savePng(filePath.toLatin1().data());
+        }else if("pdf" == formatStr)
+        {
+            ui->MA_2_widget->savePdf(filePath.toLatin1().data());
+        }
+
+        QString strMsg = QStringLiteral("图片已经保存至：") +filePath;
+        QMessageBox::information(NULL,QStringLiteral("提示"),strMsg);
+
+    }else
+    {
+        return ;
+    }
+}
+
+
+//save MA3
+void Hist_MA_Dialog::on_save_MA3_pushButton_clicked()
+{
+    QString filePath;
+    QFileDialog *fileDialog = new QFileDialog(this);//创建一个QFileDialog对象，构造函数中的参数可以有所添加。
+    fileDialog->setWindowTitle(tr("Save As"));//设置文件保存对话框的标题
+    fileDialog->setAcceptMode(QFileDialog::AcceptSave);//设置文件对话框为保存模式
+    fileDialog->setFileMode(QFileDialog::AnyFile);//设置文件对话框弹出的时候显示任何文件，不论是文件夹还是文件
+    fileDialog->setViewMode(QFileDialog::Detail);//文件以详细的形式显示，显示文件名，大小，创建日期等信息；
+    fileDialog->setGeometry(10,30,300,200);//设置文件对话框的显示位置
+    fileDialog->setDirectory(".");//设置文件对话框打开时初始打开的位置
+    QStringList mimeTypeFilters;
+//    mimeTypeFilters <<"(*.bmp)|*.bmp|JPEG(*.jpg)|*.jpg;|Png(*.png)|*.png" ;
+    mimeTypeFilters<<"bmp(*.bmp)|*.bmp"<<"JPEG(*.jpg)|*.jpg"<<"Png(*.png)|*.png"<<"PDF(*.pdf)|*.pdf";
+    fileDialog->setNameFilters(mimeTypeFilters);
+
+
+    if(fileDialog->exec() == QDialog::Accepted)
+    {
+        filePath = fileDialog->selectedFiles()[0];//得到用户选择的文件名
+        qDebug()<<" filePath = "<<filePath<<endl;
+        QString formatStr = filePath.right(3);
+        //保存直方图
+        if("bmp" == formatStr)
+        {
+            ui->MA_3_widget->saveBmp(filePath.toLatin1().data());
+
+        }else if("jpg" == formatStr)
+        {
+            ui->MA_3_widget->saveJpg(filePath.toLatin1().data());
+        }else if("png" == formatStr)
+        {
+            ui->MA_3_widget->savePng(filePath.toLatin1().data());
+        }else if("pdf" == formatStr)
+        {
+            ui->MA_3_widget->savePdf(filePath.toLatin1().data());
+        }
+        QString strMsg = QStringLiteral("图片已经保存至：") +filePath;
+        QMessageBox::information(NULL,QStringLiteral("提示"),strMsg);
+
+    }else
+    {
+        return ;
+    }
+}
+
+// save MA4
+void Hist_MA_Dialog::on_save_MA4_pushButton_clicked()
+{
+    QString filePath;
+    QFileDialog *fileDialog = new QFileDialog(this);//创建一个QFileDialog对象，构造函数中的参数可以有所添加。
+    fileDialog->setWindowTitle(tr("Save As"));//设置文件保存对话框的标题
+    fileDialog->setAcceptMode(QFileDialog::AcceptSave);//设置文件对话框为保存模式
+    fileDialog->setFileMode(QFileDialog::AnyFile);//设置文件对话框弹出的时候显示任何文件，不论是文件夹还是文件
+    fileDialog->setViewMode(QFileDialog::Detail);//文件以详细的形式显示，显示文件名，大小，创建日期等信息；
+    fileDialog->setGeometry(10,30,300,200);//设置文件对话框的显示位置
+    fileDialog->setDirectory(".");//设置文件对话框打开时初始打开的位置
+    QStringList mimeTypeFilters;
+//    mimeTypeFilters <<"(*.bmp)|*.bmp|JPEG(*.jpg)|*.jpg;|Png(*.png)|*.png" ;
+    mimeTypeFilters<<"bmp(*.bmp)|*.bmp"<<"JPEG(*.jpg)|*.jpg"<<"Png(*.png)|*.png"<<"PDF(*.pdf)|*.pdf";
+    fileDialog->setNameFilters(mimeTypeFilters);
+
+
+    if(fileDialog->exec() == QDialog::Accepted)
+    {
+        filePath = fileDialog->selectedFiles()[0];//得到用户选择的文件名
+        qDebug()<<" filePath = "<<filePath<<endl;
+        QString formatStr = filePath.right(3);
+        //保存直方图
+        if("bmp" == formatStr)
+        {
+            ui->MA_4_widget->saveBmp(filePath.toLatin1().data());
+
+        }else if("jpg" == formatStr)
+        {
+            ui->MA_4_widget->saveJpg(filePath.toLatin1().data());
+        }else if("png" == formatStr)
+        {
+            ui->MA_4_widget->savePng(filePath.toLatin1().data());
+        }else if("pdf" == formatStr)
+        {
+            ui->MA_4_widget->savePdf(filePath.toLatin1().data());
+        }
+
+        QString strMsg = QStringLiteral("图片已经保存至：") +filePath;
+        QMessageBox::information(NULL,QStringLiteral("提示"),strMsg);
+    }else
+    {
+        return ;
+    }
+}

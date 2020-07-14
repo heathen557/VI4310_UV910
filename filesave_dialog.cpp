@@ -10,19 +10,19 @@ fileSave_Dialog::fileSave_Dialog(QWidget *parent) :
 
     ui->RawTof_checkBox->setEnabled(false);
 
-//    disable_checkBoxUI();
+    disable_checkBoxUI();
 }
 
 void fileSave_Dialog::disable_checkBoxUI()
 {
-    ui->RawTof_checkBox->setVisible(false);
+//    ui->RawTof_checkBox->setVisible(false);
     ui->pileUpTof_checkBox->setVisible(false);
     ui->filterTof_checkBox->setVisible(false);
-    ui->RawPeak_checkBox->setVisible(false);
+//    ui->RawPeak_checkBox->setVisible(false);
     ui->filterPeak_checkBox->setVisible(false);
-    ui->X_checkBox->setVisible(false);
-    ui->Y_checkBox->setVisible(false);
-    ui->Z_checkBox->setVisible(false);
+//    ui->X_checkBox->setVisible(false);
+//    ui->Y_checkBox->setVisible(false);
+//    ui->Z_checkBox->setVisible(false);
 
 }
 

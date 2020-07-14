@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>VI4310_Demo(v3.0)</string>
+   <string>VI4310_Demo</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -432,176 +432,190 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>459</height>
+          <height>342</height>
          </rect>
         </property>
         <attribute name="label">
          <string>基本设置</string>
         </attribute>
-        <widget class="QGroupBox" name="groupBox_10">
-         <property name="geometry">
-          <rect>
-           <x>30</x>
-           <y>30</y>
-           <width>240</width>
-           <height>123</height>
-          </rect>
-         </property>
-         <property name="title">
-          <string>设备连接：</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_10">
-          <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_18" stretch="4,2">
-            <item>
-             <widget class="QComboBox" name="device_comboBox"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="EnumDevice_pushButton">
-              <property name="text">
-               <string>枚举</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_19" stretch="4,2">
-            <item>
-             <widget class="QLineEdit" name="initFilePath_lineEdit"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="load_iniFile_pushButton">
-              <property name="text">
-               <string>INI文件选择</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="2" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_20" stretch="4,2">
-            <item>
-             <spacer name="horizontalSpacer_8">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>128</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QPushButton" name="openDevice_pushButton">
-              <property name="text">
-               <string>打开</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QGroupBox" name="groupBox_11">
-         <property name="geometry">
-          <rect>
-           <x>30</x>
-           <y>160</y>
-           <width>240</width>
-           <height>147</height>
-          </rect>
-         </property>
-         <property name="title">
-          <string>I2C设置：</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_14">
-          <item row="0" column="0">
-           <layout class="QFormLayout" name="formLayout">
+        <layout class="QGridLayout" name="gridLayout_12">
+         <item row="0" column="0">
+          <widget class="QGroupBox" name="groupBox_10">
+           <property name="title">
+            <string>设备连接：</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_10">
             <item row="0" column="0">
-             <widget class="QLabel" name="label_18">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Addr(0x)：     </string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="I2C_addr_lineEdit">
-              <property name="text">
-               <string>D8</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="horizontalLayout_18" stretch="4,2">
+              <item>
+               <widget class="QComboBox" name="device_comboBox"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="EnumDevice_pushButton">
+                <property name="text">
+                 <string>枚举</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_19">
-              <property name="text">
-               <string>Reg(0x): </string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLineEdit" name="I2C_Reg_lineEdit">
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="horizontalLayout_19" stretch="4,2">
+              <item>
+               <widget class="QLineEdit" name="initFilePath_lineEdit"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="load_iniFile_pushButton">
+                <property name="text">
+                 <string>INI文件选择</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item row="2" column="0">
-             <widget class="QLabel" name="label_20">
-              <property name="text">
-               <string>Value(0x): </string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLineEdit" name="I2C_value_lineEdit">
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QPushButton" name="I2C_read_pushButton">
-              <property name="text">
-               <string>读取</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QPushButton" name="I2C_write_pushButton">
-              <property name="text">
-               <string>写入</string>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="horizontalLayout_20" stretch="4,2">
+              <item>
+               <spacer name="horizontalSpacer_8">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>128</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="openDevice_pushButton">
+                <property name="text">
+                 <string>打开</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QPushButton" name="play_pushButton">
-         <property name="geometry">
-          <rect>
-           <x>180</x>
-           <y>340</y>
-           <width>80</width>
-           <height>20</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>play</string>
-         </property>
-        </widget>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QGroupBox" name="groupBox_11">
+           <property name="title">
+            <string>I2C设置：</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_14">
+            <item row="0" column="0">
+             <layout class="QFormLayout" name="formLayout">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_18">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Addr(0x)：     </string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="I2C_addr_lineEdit">
+                <property name="text">
+                 <string>D8</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_19">
+                <property name="text">
+                 <string>Reg(0x): </string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="I2C_Reg_lineEdit">
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_20">
+                <property name="text">
+                 <string>Value(0x): </string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="I2C_value_lineEdit">
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QPushButton" name="I2C_read_pushButton">
+                <property name="text">
+                 <string>读取</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QPushButton" name="I2C_write_pushButton">
+                <property name="text">
+                 <string>写入</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <spacer name="horizontalSpacer_7">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>88</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="play_pushButton">
+             <property name="text">
+              <string>play</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="3" column="0">
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>133</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="page_2">
         <property name="geometry">
@@ -609,7 +623,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>459</height>
+          <height>342</height>
          </rect>
         </property>
         <attribute name="label">
@@ -707,184 +721,131 @@
           <rect>
            <x>40</x>
            <y>200</y>
-           <width>220</width>
-           <height>241</height>
+           <width>231</width>
+           <height>211</height>
           </rect>
          </property>
          <property name="title">
           <string>显示设置：</string>
          </property>
-         <widget class="QLabel" name="label_12">
-          <property name="geometry">
-           <rect>
-            <x>12</x>
-            <y>40</y>
-            <width>96</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>  peak显示阈值：</string>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="peakOffset_lineEdit">
-          <property name="geometry">
-           <rect>
-            <x>114</x>
-            <y>40</y>
-            <width>94</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>0.0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_14">
-          <property name="geometry">
-           <rect>
-            <x>12</x>
-            <y>80</y>
-            <width>96</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>      平均帧数：</string>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="averageNum_lineEdit">
-          <property name="geometry">
-           <rect>
-            <x>114</x>
-            <y>80</y>
-            <width>94</width>
-            <height>22</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>1</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_13">
-          <property name="geometry">
-           <rect>
-            <x>12</x>
-            <y>157</y>
-            <width>96</width>
-            <height>16</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>只显示中心区域：</string>
-          </property>
-         </widget>
-         <widget class="QRadioButton" name="centerShowYes_radioButton">
-          <property name="geometry">
-           <rect>
-            <x>114</x>
-            <y>157</y>
-            <width>37</width>
-            <height>18</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>是</string>
-          </property>
-         </widget>
-         <widget class="QRadioButton" name="centerShowNo_radioButton">
-          <property name="geometry">
-           <rect>
-            <x>164</x>
-            <y>157</y>
-            <width>37</width>
-            <height>18</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>否</string>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_9">
-          <property name="geometry">
-           <rect>
-            <x>30</x>
-            <y>120</y>
-            <width>71</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Kalman系数：</string>
-          </property>
-         </widget>
-         <widget class="QLineEdit" name="kalmanPara_lineEdit">
-          <property name="geometry">
-           <rect>
-            <x>120</x>
-            <y>120</y>
-            <width>91</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>1</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_21">
-          <property name="geometry">
-           <rect>
-            <x>11</x>
-            <y>190</y>
-            <width>96</width>
-            <height>18</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>  是否均值过滤：</string>
-          </property>
-         </widget>
-         <widget class="QRadioButton" name="centerShowYes_radioButton_2">
-          <property name="geometry">
-           <rect>
-            <x>113</x>
-            <y>190</y>
-            <width>51</width>
-            <height>18</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>是</string>
-          </property>
-         </widget>
-         <widget class="QRadioButton" name="centerShowNo_radioButton_2">
-          <property name="geometry">
-           <rect>
-            <x>170</x>
-            <y>190</y>
-            <width>51</width>
-            <height>18</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>否</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
+         <layout class="QGridLayout" name="gridLayout_11">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>  peak显示阈值：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="2">
+           <widget class="QLineEdit" name="peakOffset_lineEdit">
+            <property name="text">
+             <string>0.0</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
+             <string>      平均帧数：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="QLineEdit" name="averageNum_lineEdit">
+            <property name="text">
+             <string>1</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Kalman系数(tof)：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="2">
+           <widget class="QLineEdit" name="kalmanPara_lineEdit">
+            <property name="text">
+             <string>1</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_22">
+            <property name="text">
+             <string>Kalman系数(peak)：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1" colspan="2">
+           <widget class="QLineEdit" name="kalmanPara_peak_lineEdit">
+            <property name="text">
+             <string>1</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>只显示中心区域：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QRadioButton" name="centerShowYes_radioButton">
+            <property name="text">
+             <string>是</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QRadioButton" name="centerShowNo_radioButton">
+            <property name="text">
+             <string>否</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_21">
+            <property name="text">
+             <string>  是否均值过滤：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QRadioButton" name="centerShowYes_radioButton_2">
+            <property name="text">
+             <string>是</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QRadioButton" name="centerShowNo_radioButton_2">
+            <property name="text">
+             <string>否</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
         <widget class="QCheckBox" name="isShowNormalizationPeak_checkBox">
          <property name="geometry">
@@ -906,7 +867,7 @@
           <x>0</x>
           <y>0</y>
           <width>300</width>
-          <height>459</height>
+          <height>342</height>
          </rect>
         </property>
         <attribute name="label">

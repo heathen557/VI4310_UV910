@@ -54,10 +54,10 @@ void CameraSetting_Dialog::on_ok_pushButton_clicked()
     QString lowByte = integrateStr.mid(1,2);
     qDebug()<<"highByte="<<highByte<<"  lowByte="<<lowByte;
 
-    QString addressStr = "07";
+    QString addressStr = "08";
     emit write_I2C_integrate_signal(addressStr,lowByte);
     Sleep(10);
-    addressStr = "08";
+    addressStr = "07";
     emit write_I2C_integrate_signal(addressStr,highByte);
 
 

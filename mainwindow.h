@@ -179,6 +179,8 @@ private slots:
     /**************************/
     void write_I2C_slot(QString addressStr,QString valueStr);
 
+    void on_kalmanPara_peak_lineEdit_returnPressed();
+
 signals:
     void rece_signal();
 
@@ -223,7 +225,8 @@ private:
     QTimer oneSec_timer;            //统计帧率相关
     int frameCount;
     QLabel fpsLabel;
-
+    QLabel temptureLabel;
+    int temperatureIndex;
     aboutDialog about_dia;
 
     CameraSetting_Dialog  cameraSetting_dia;

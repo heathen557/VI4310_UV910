@@ -5,6 +5,14 @@
 #include"qcustomplot.h"
 #include"filterwindow_dialog.h"
 
+
+// alter 2020-07-14
+// add: TDC_min : TDC_max
+// add: show holdValue ratio
+// add: saveHistogram
+// reStart: clear
+
+
 namespace Ui {
 class Hist_MA_Dialog;
 }
@@ -39,6 +47,9 @@ public:
 
     int channelNum;   //通道个数
 
+    int TDC_min;
+    int TDC_max;
+
 
 
 
@@ -72,6 +83,7 @@ public slots:
     void toShowHistogram_channel4_slot(QVector<double> histogram_vec,int maxValue);
 
 
+    void sendFrameIndex_slot(int );
 signals:
 
     //告知UV910接收线程  开启接收rowData MA 的模式
@@ -79,6 +91,21 @@ signals:
 
 //    void start_RowDatahistogram_signal(int ,int, int row,int col, bool);              //单个pixel  曝光次数，积分次数 ，行、列、 开启关闭标识
     void start_RowData_bin_histogram_signal(int,int,QVector<int>,int,int,bool);          //开启binning rawData测试  曝光次数，积分次数，初始行、列、 窗口大小（2、4）、通道个数、 开启关闭标识
+
+    void clearHistogram_signal();
+
+private slots:
+    void on_TDC_min_lineEdit_returnPressed();
+
+    void on_TDC_max_lineEdit_returnPressed();
+
+    void on_save_MA1_pushButton_clicked();
+
+    void on_save_MA2_pushButton_clicked();
+
+    void on_save_MA3_pushButton_clicked();
+
+    void on_save_MA4_pushButton_clicked();
 
 private:
     Ui::Hist_MA_Dialog *ui;

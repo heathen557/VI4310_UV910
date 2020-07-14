@@ -9,6 +9,12 @@ receUV910::receUV910(QObject *parent) : QObject(parent)
 {
 
     qDebug()<<"receUV910 thread has start";
+
+    myAvdd_int = 2800 ;
+    my_dovdd_int = 3300;
+    dvdd_int = 1500;
+    afvcc_int = 2800;
+
 }
 void receUV910::receUV910_data_slot()
 {
@@ -176,22 +182,22 @@ bool receUV910::OpenCamera()
         //wait for the PmuSetOnOff is On....
         Sleepms(50);
         // 1, power the dovdd...
-        Volt[POWER_DOVDD] = 3300;//(int)(CurrentSensor.dovdd); // 1.8V
+        Volt[POWER_DOVDD] = my_dovdd_int;//(int)(CurrentSensor.dovdd); // 1.8V
         PmuSetVoltage(Power, Volt, 5, m_nDevID);
         Sleepms(2);
 
         // 3, power on the  dvdd
-        Volt[POWER_DVDD] = 1500;//(int)(CurrentSensor.dvdd);// 1.2V
+        Volt[POWER_DVDD] = dvdd_int;//(int)(CurrentSensor.dvdd);// 1.2V
         PmuSetVoltage(Power, Volt, 5, m_nDevID);
         Sleepms(2);
 
         // 2. power the avdd.
-        Volt[POWER_AVDD] = 2800;//(int)(CurrentSensor.avdd); // 2.8V
+        Volt[POWER_AVDD] = myAvdd_int;//(int)(CurrentSensor.avdd); // 2.8V
         PmuSetVoltage(Power, Volt,5, m_nDevID);
         Sleepms(2);
 
         //4. power the afvcc ...
-        Volt[POWER_AFVCC] = 2800;//(int)(afvcc); // 2.8V
+        Volt[POWER_AFVCC] = afvcc_int;//(int)(afvcc); // 2.8V
         PmuSetVoltage(Power, Volt, 5, m_nDevID);
         Sleepms(2);
         //5. power the vpp...
@@ -473,6 +479,7 @@ bool receUV910::OpenCamera()
 
 void receUV910::on_newFrame_pushButton_clicked()
 {
+
 }
 
 
@@ -758,6 +765,13 @@ void receUV910::Load(QString filePath)
     CurrentSensor.Ext1 = (UINT)sensorIniFile.value("Sensor/Ext1").toInt(&isChangeOK);
     CurrentSensor.Ext2 = (UINT)sensorIniFile.value("Sensor/Ext2").toInt(&isChangeOK);
     bloadIniFile(fileName);
+
+    myAvdd_int = sensorIniFile.value("Sensor/avdd").toInt(&isChangeOK);
+    my_dovdd_int = sensorIniFile.value("Sensor/dovdd").toInt(&isChangeOK);
+    dvdd_int = sensorIniFile.value("Sensor/dvdd").toInt(&isChangeOK);
+    afvcc_int = sensorIniFile.value("Sensor/afvcc").toInt(&isChangeOK);
+
+    qDebug()<<"myAvdd_int="<<myAvdd_int<<"   my_dovdd_int="<<my_dovdd_int<<"  dvdd_int="<<dvdd_int<<"  afvcc_int="<<afvcc_int;
 }
 
 
@@ -784,22 +798,7 @@ void receUV910::on_openDevice_pushButton_clicked(QString filePath)
 
 
 
-    //初始化设备以后，根据配置文件设置积分次数
-    Sleepms(10);
-    QSettings configSetting("setting.ini", QSettings::IniFormat);
-    int integrate_num = configSetting.value("camera/integrate_num").toInt();
 
-    QString integrateStr = QString("%1").arg(integrate_num,3,16,QChar('0')).toUpper();
-    qDebug()<<"integrateStr = "<<integrateStr;
-    QString highByte = integrateStr.mid(0,1) + "0";
-    QString lowByte = integrateStr.mid(1,2);
-    qDebug()<<"highByte="<<highByte<<"  lowByte="<<lowByte;
-
-    QString addressStr = "07";
-    emit write_I2C_integrate_signal(addressStr,lowByte);
-    Sleepms(10);
-    addressStr = "08";
-    emit write_I2C_integrate_signal(addressStr,highByte);
 
 }
 

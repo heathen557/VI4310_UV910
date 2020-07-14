@@ -110,6 +110,8 @@ public:
     bool isKalman;
     float kalmanOffset_para;
 
+    float kalmanOffset_peak_para;
+
 
     //中值滤波算法相关
     float src_tof[160][120];

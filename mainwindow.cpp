@@ -53,7 +53,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->groupBox_5->setVisible(false);
 
+    temperatureIndex = 0;
     ui->statusBar->addWidget(&fpsLabel);
+    ui->statusBar->addWidget(&temptureLabel);
 
 #ifndef SHOW_HISTORGRAM_BUTTON
     ui->tof_Histogram_pushButton->setVisible(false);
@@ -205,6 +207,8 @@ void MainWindow::init_connect()   //信号与槽的初始化
     connect(calMA_obj,&calMA_thread::toShowHistogram_channel2_signal,&Hist_MA_dia,&Hist_MA_Dialog::toShowHistogram_channel2_slot);
     connect(calMA_obj,&calMA_thread::toShowHistogram_channel3_signal,&Hist_MA_dia,&Hist_MA_Dialog::toShowHistogram_channel3_slot);
     connect(calMA_obj,&calMA_thread::toShowHistogram_channel4_signal,&Hist_MA_dia,&Hist_MA_Dialog::toShowHistogram_channel4_slot);
+    connect(calMA_obj,&calMA_thread::sendFrameIndex_signal,&Hist_MA_dia,&Hist_MA_Dialog::sendFrameIndex_slot);
+    connect(&Hist_MA_dia,&Hist_MA_Dialog::clearHistogram_signal,calMA_obj,&calMA_thread::clearHistogram_slot);
 
 }
 
@@ -275,6 +279,23 @@ void MainWindow::on_openFile_action_triggered()
 //!开启播放图像的槽函数
 void MainWindow::on_play_pushButton_clicked()
 {
+    //1 首先根据配置文件设置积分次数
+    QSettings configSetting("setting.ini", QSettings::IniFormat);
+    int integrate_num = configSetting.value("camera/integrate_num").toInt();
+
+    QString integrateStr = QString("%1").arg(integrate_num,3,16,QChar('0')).toUpper();
+    qDebug()<<"integrateStr = "<<integrateStr;
+    QString highByte = integrateStr.mid(0,1) + "0";
+    QString lowByte = integrateStr.mid(1,2);
+    qDebug()<<"highByte="<<highByte<<"  lowByte="<<lowByte;
+
+    QString addressStr = "07";
+    write_I2C_slot(addressStr,highByte);
+    Sleep(10);
+    addressStr = "08";
+    write_I2C_slot(addressStr,lowByte);
+
+
     if(ui->play_pushButton->text() == "play")
     {
         isReceUV910_flag = true;
@@ -593,8 +614,36 @@ void MainWindow::oneSec_timer_slot()
 
     QString fpsStr = "fps:"+QString::number(frameCount);
     fpsLabel.setText(fpsStr);
-
     frameCount = 0;
+
+    //显示温度相关
+    temperatureIndex++;
+    if(5 == temperatureIndex)
+    {
+        temperatureIndex = 0;
+        int iRet = 0;
+        QString i2cAddr = "92";
+        UINT uAddr = i2cAddr.toInt(NULL,16);
+        UINT uReg = 0;
+        USHORT uValue;
+        QString sValue;
+
+        iRet = ReadSensorReg(uAddr,uReg,&uValue,4,m_nDevID);
+        if(iRet != DT_ERROR_OK)
+        {
+            return;
+        }
+        sValue = QString("%1").arg(uValue,4,16,QChar('0')).toUpper();
+        int tmpValue = sValue.mid(0,2).toInt(NULL,16) *16 + sValue.mid(2,1).toInt(NULL,16);
+        float temperture_f = tmpValue*0.0625;
+        QString temperture_str = QString::number(temperture_f,'f',1) +QStringLiteral("℃");
+
+        temptureLabel.setText("Temp:" + temperture_str);
+
+//        QString str_log = "[Read I2C]:I2C_addr="+QString("%1").arg(uAddr,2,16,QChar('0')).toUpper() + ",Reg="+QString("%1").arg(uReg,2,16,QChar('0')).toUpper() + ",Value="+QString("%1").arg(uValue,4,16,QChar('0')).toUpper();
+//        Display_log_slot(str_log);
+    }
+
 }
 
 
@@ -1615,8 +1664,18 @@ void MainWindow::on_cameraPara_action_triggered()
 void MainWindow::on_kalmanPara_lineEdit_returnPressed()
 {
     dealMsg_obj->kalmanOffset_para = ui->kalmanPara_lineEdit->text().toFloat();
-    qDebug()<<"kalmanPara = "<<ui->kalmanPara_lineEdit->text().toFloat();
+    qDebug()<<"kalmanPara tof = "<<ui->kalmanPara_lineEdit->text().toFloat();
 }
+
+//!
+//! \brief MainWindow::on_kalmanPara_peak_lineEdit_returnPressed
+//! 卡尔曼滤波 的peak值系数
+void MainWindow::on_kalmanPara_peak_lineEdit_returnPressed()
+{
+    dealMsg_obj->kalmanOffset_peak_para = ui->kalmanPara_peak_lineEdit->text().toFloat();
+    qDebug()<<"kalmanPara  peak = "<<ui->kalmanPara_peak_lineEdit->text().toFloat();
+}
+
 
 //平均时候的阈值
 void MainWindow::on_meanTof_offset_lineEdit_returnPressed()
@@ -1782,5 +1841,6 @@ void MainWindow::on_rawDatapushButton_clicked()
 {
     dealMsg_obj->UV910_RawData_deal_slot("");
 }
+
 
 

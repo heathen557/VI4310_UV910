@@ -180,6 +180,7 @@ static const char *vertexShaderSourceCore =
     "   vert = vertex.xyz;\n"
     "   vertNormal =  normal;\n"
     "   gl_Position = projMatrix * mvMatrix * vertex;\n"
+    "   gl_PointSize = 2;\n"
     "}\n";
 
 //static const char *fragmentShaderSourceCore = NULL;
@@ -317,6 +318,7 @@ void GLWidget::paintGL()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_PROGRAM_POINT_SIZE);
     //    glEnable(GL_CULL_FACE);
 
     m_world.setToIdentity();

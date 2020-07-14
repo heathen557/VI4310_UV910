@@ -30,6 +30,8 @@ signals:
     void toShowHistogram_channel3_signal(QVector<double>,int);
     void toShowHistogram_channel4_signal(QVector<double>,int);
 
+    void sendFrameIndex_signal(int);
+
 public slots:
 
     //接收一帧rowData数据
@@ -38,6 +40,10 @@ public slots:
     //接收要处理的rowdata
     //开启binning rawData测试  曝光次数，积分次数，初始行、列、 窗口大小（2、4）、通道个数、 开启关闭标识
     void start_RowData_bin_histogram_slot(int,int,QVector<int>,int,int,bool);
+
+
+    //数据清空
+    void clearHistogram_slot();
 };
 
 #endif // CALMA_THREAD_H

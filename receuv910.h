@@ -23,6 +23,11 @@ public:
     int m_PreviewHeight;
 //    unsigned long m_GrabSize;
 
+    int myAvdd_int;
+    int my_dovdd_int;
+    int dvdd_int;
+    int afvcc_int;
+
 
     /*********接收Rowdata数据相关***************/
     int isRawDataSave_flag;      // 1:rowdata数据保存   2：RowData MA数据接收

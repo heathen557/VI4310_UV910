@@ -112,6 +112,22 @@ void calMA_thread::start_RowData_bin_histogram_slot(int exposureNum,int Integrat
 
 }
 
+
+//!
+//! \brief calMA_thread::clearHistogram_slot
+//!清空 所有的数据
+void calMA_thread::clearHistogram_slot()
+{
+    for(int i=0; i<4096; i++)
+    {
+        historgramVec_MA[0][i] = 0;
+        historgramVec_MA[1][i] = 0;
+        historgramVec_MA[2][i] = 0;
+        historgramVec_MA[3][i] = 0;
+        historgramVec_MA[4][i] = 0;
+    }
+}
+
 //!
 //! \brief calMA_thread::send_calMA_slot
 //! \param rawDataMA_str  长度为19200 每个QString 包含 80个数据
@@ -479,12 +495,13 @@ void calMA_thread::send_calMA_slot(QStringList rawDataMA_str)
     }
 
 
+    emit sendFrameIndex_signal(currentFrame);
     if(currentFrame>=histogram_frame) //发送一次直方图数据
     {
-        emit toShowHistogram_channel1_signal(historgramVec_MA[1],0);
-        emit toShowHistogram_channel2_signal(historgramVec_MA[2],0);
-        emit toShowHistogram_channel3_signal(historgramVec_MA[3],0);
-        emit toShowHistogram_channel4_signal(historgramVec_MA[4],0);
+//        emit toShowHistogram_channel1_signal(historgramVec_MA[1],0);
+//        emit toShowHistogram_channel2_signal(historgramVec_MA[2],0);
+//        emit toShowHistogram_channel3_signal(historgramVec_MA[3],0);
+//        emit toShowHistogram_channel4_signal(historgramVec_MA[4],0);
 
         for(int i=0;i<historgramVec_MA[1].size(); i++)
         {
@@ -495,6 +512,12 @@ void calMA_thread::send_calMA_slot(QStringList rawDataMA_str)
         }
         currentFrame = 0;
     }
+
+
+    emit toShowHistogram_channel1_signal(historgramVec_MA[1],0);
+    emit toShowHistogram_channel2_signal(historgramVec_MA[2],0);
+    emit toShowHistogram_channel3_signal(historgramVec_MA[3],0);
+    emit toShowHistogram_channel4_signal(historgramVec_MA[4],0);
 }
 
 

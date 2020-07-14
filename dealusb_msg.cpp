@@ -117,6 +117,7 @@ DealUsb_msg::DealUsb_msg(QObject *parent) : QObject(parent),
     peak_kalman_R = 5;
 
     kalmanOffset_para = 1;   //两帧之间offset的系数
+    kalmanOffset_peak_para = 1;
 
 
     //初始化文件保存槽函数
@@ -620,9 +621,9 @@ void DealUsb_msg::distortionCorrect_slot()
 
     double XC1,YC1,XC2,YC2,r2;
 
-    for(int v=0; v<120; v++)
+    for(int v=0; v<120; v++)       //行
     {
-        for(int u=0;u<160;u++)
+        for(int u=0;u<160;u++)     //列
         {
             u_distorted = 0;
             v_distorted = 0;
@@ -804,7 +805,7 @@ void DealUsb_msg::UV910_Qtech_deal_slot(QByteArray array)
                     }
                     if(isSaveRawPeak)
                     {
-                        tofPeakNum[cloudIndex+1].append(QString::number(raw_intensity) + " " );
+                        tofPeakNum[cloudIndex+1].append(QString::number(src_intensity) + " " );
                     }
 
                 }
@@ -1149,6 +1150,8 @@ float DealUsb_msg::kalmanFilter_peak_slot(float srcPeak,int index)
         return peak_x_k[index];
     }
 
+    float tmpPeak = peak_x_k[index];
+
     peak_kalman_R = p1 *srcPeak*srcPeak + p2*srcPeak+ p3;             //取值范围[1 15]
     peak_kalman_R = peak_kalman_R<1?1:peak_kalman_R;
 
@@ -1161,8 +1164,17 @@ float DealUsb_msg::kalmanFilter_peak_slot(float srcPeak,int index)
     peak_x_k[index] = peak_x_k[index] + peak_K[index]*(srcPeak - peak_kalman_H * peak_x_k[index]);
 
 
-    //    qDebug()<<"srcPeak="<<srcPeak<<"  resPeak="<<peak_x_k[index];
-    return peak_x_k[index] ;
+//    qDebug()<<"srcPeak="<<srcPeak<<"  resPeak="<<peak_x_k[index];
+//    return peak_x_k[index] ;
+
+    if(abs(srcPeak-tmpPeak)>kalmanOffset_peak_para)
+    {
+        return srcPeak;
+    }else
+    {
+        return peak_x_k[index];
+    }
+
 }
 
 
