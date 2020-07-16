@@ -8,7 +8,7 @@ QT       += core gui datavisualization multimedia multimediawidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
-TARGET = VI4310_Qtech_3.0
+TARGET = VI4310_UV910_3.1
 
 TEMPLATE = app
 

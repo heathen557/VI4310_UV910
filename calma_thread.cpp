@@ -28,6 +28,7 @@ void calMA_thread::start_RowData_bin_histogram_slot(int exposureNum,int Integrat
     histogram_frame = IntegrationNum/exposureNum;
     binning_winSize = winSize;
     channelNum = channelNum_;
+    isSend_flag = flag;
 
     //需要binning 的像素点的位置
     if(1 == winSize)        //1x1窗口
@@ -126,6 +127,7 @@ void calMA_thread::clearHistogram_slot()
         historgramVec_MA[3][i] = 0;
         historgramVec_MA[4][i] = 0;
     }
+    currentFrame = 0;
 }
 
 //!
@@ -495,7 +497,22 @@ void calMA_thread::send_calMA_slot(QStringList rawDataMA_str)
     }
 
 
-    emit sendFrameIndex_signal(currentFrame);
+
+
+    if(isSend_flag)
+    {
+        emit toShowHistogram_channel1_signal(historgramVec_MA[1],0);   //实时发送数据
+        emit toShowHistogram_channel2_signal(historgramVec_MA[2],0);
+        emit toShowHistogram_channel3_signal(historgramVec_MA[3],0);
+        emit toShowHistogram_channel4_signal(historgramVec_MA[4],0);
+
+        emit sendFrameIndex_signal(currentFrame);
+
+    }
+
+
+
+
     if(currentFrame>=histogram_frame) //发送一次直方图数据
     {
 //        emit toShowHistogram_channel1_signal(historgramVec_MA[1],0);
@@ -514,10 +531,7 @@ void calMA_thread::send_calMA_slot(QStringList rawDataMA_str)
     }
 
 
-    emit toShowHistogram_channel1_signal(historgramVec_MA[1],0);
-    emit toShowHistogram_channel2_signal(historgramVec_MA[2],0);
-    emit toShowHistogram_channel3_signal(historgramVec_MA[3],0);
-    emit toShowHistogram_channel4_signal(historgramVec_MA[4],0);
+
 }
 
 

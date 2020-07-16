@@ -296,6 +296,10 @@ void MainWindow::on_play_pushButton_clicked()
     write_I2C_slot(addressStr,lowByte);
 
 
+    // 2  根据I2C地址确定模组厂商，来确定读取传感器时 I2C的地址；
+    belongTo_company();
+    Sleep(5);
+
     if(ui->play_pushButton->text() == "play")
     {
         isReceUV910_flag = true;
@@ -615,19 +619,21 @@ void MainWindow::oneSec_timer_slot()
     QString fpsStr = "fps:"+QString::number(frameCount);
     fpsLabel.setText(fpsStr);
     frameCount = 0;
-
     //显示温度相关
     temperatureIndex++;
     if(5 == temperatureIndex)
     {
+        QString msgStr;
+
         temperatureIndex = 0;
         int iRet = 0;
-        QString i2cAddr = "92";
+        QString i2cAddr = LDS_I2C_str;
         UINT uAddr = i2cAddr.toInt(NULL,16);
         UINT uReg = 0;
         USHORT uValue;
         QString sValue;
 
+        // Ld温度
         iRet = ReadSensorReg(uAddr,uReg,&uValue,4,m_nDevID);
         if(iRet != DT_ERROR_OK)
         {
@@ -636,12 +642,25 @@ void MainWindow::oneSec_timer_slot()
         sValue = QString("%1").arg(uValue,4,16,QChar('0')).toUpper();
         int tmpValue = sValue.mid(0,2).toInt(NULL,16) *16 + sValue.mid(2,1).toInt(NULL,16);
         float temperture_f = tmpValue*0.0625;
-        QString temperture_str = QString::number(temperture_f,'f',1) +QStringLiteral("℃");
+        QString temperture_str = QString::number(temperture_f,'f',1) +QStringLiteral("℃ ; ");
+        msgStr.append("ldTemp:").append(temperture_str);
 
-        temptureLabel.setText("Temp:" + temperture_str);
 
-//        QString str_log = "[Read I2C]:I2C_addr="+QString("%1").arg(uAddr,2,16,QChar('0')).toUpper() + ",Reg="+QString("%1").arg(uReg,2,16,QChar('0')).toUpper() + ",Value="+QString("%1").arg(uValue,4,16,QChar('0')).toUpper();
-//        Display_log_slot(str_log);
+        //sensor 温度
+        i2cAddr = sensor_I2C_str;
+        uAddr = i2cAddr.toInt(NULL,16);
+        iRet = ReadSensorReg(uAddr,uReg,&uValue,4,m_nDevID);
+        if(iRet != DT_ERROR_OK)
+        {
+            return;
+        }
+        sValue = QString("%1").arg(uValue,4,16,QChar('0')).toUpper();
+        tmpValue = sValue.mid(0,2).toInt(NULL,16) *16 + sValue.mid(2,1).toInt(NULL,16);
+        temperture_f = tmpValue*0.0625;
+        temperture_str = QString::number(temperture_f,'f',1) +QStringLiteral("℃");
+        msgStr.append("senTemp:").append(temperture_str);
+
+        temptureLabel.setText(msgStr);
     }
 
 }
@@ -1674,6 +1693,44 @@ void MainWindow::on_kalmanPara_peak_lineEdit_returnPressed()
 {
     dealMsg_obj->kalmanOffset_peak_para = ui->kalmanPara_peak_lineEdit->text().toFloat();
     qDebug()<<"kalmanPara  peak = "<<ui->kalmanPara_peak_lineEdit->text().toFloat();
+}
+
+void MainWindow::belongTo_company()
+{
+    Sleep(5);
+    QString saddr;
+    QString str;
+    int ret;
+    for(int i=0;i<0xff;)
+    {
+        ret=WriteSensorReg(i,0,0,0,m_nDevID);
+        if(ret==DT_ERROR_OK)
+        {
+          str = QString("%1").arg(i,1,16,QChar('0')).toUpper();
+          saddr.append(str);
+        }
+        i=i+2;
+    }
+
+    QString oflimStr = "92";
+    QString qtechStr = "49";
+    bool flag;
+    flag = saddr.contains(oflimStr);
+    if(flag)
+    {
+        corpor_company = OFlim;
+        LDS_I2C_str = "92";
+        sensor_I2C_str = "90";
+    }
+    flag = saddr.contains(qtechStr);
+    if(flag)
+    {
+        corpor_company = QTech;
+        LDS_I2C_str = "49";
+        sensor_I2C_str = "48";
+    }
+
+    qDebug()<<"belong to company";
 }
 
 

@@ -21,6 +21,13 @@
 #include"QFile"
 
 
+enum comapany
+{
+    OFlim,
+    QTech
+};
+
+
 namespace Ui {
 class MainWindow;
 }
@@ -164,9 +171,6 @@ private slots:
 
 
 
-
-
-
     void on_isShowNormalizationPeak_checkBox_clicked();
 
     void on_black_rowAndCol_toolButton_clicked();
@@ -180,6 +184,8 @@ private slots:
     void write_I2C_slot(QString addressStr,QString valueStr);
 
     void on_kalmanPara_peak_lineEdit_returnPressed();
+
+     void belongTo_company();   //看属于哪个模组厂商的槽函数
 
 signals:
     void rece_signal();
@@ -224,11 +230,16 @@ private:
     QTimer show_image_timer;         //2D图像的刷新定时器
     QTimer oneSec_timer;            //统计帧率相关
     int frameCount;
+
     QLabel fpsLabel;
     QLabel temptureLabel;
     int temperatureIndex;
-    aboutDialog about_dia;
+    comapany corpor_company;   //模组厂商
+    QString LDS_I2C_str;
+    QString sensor_I2C_str;
 
+
+    aboutDialog about_dia;
     CameraSetting_Dialog  cameraSetting_dia;
 
 

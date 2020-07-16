@@ -23,6 +23,8 @@ public:
 
 
     int currentFrame;
+
+    bool isSend_flag;
 signals:
 
     void toShowHistogram_channel1_signal(QVector<double>,int);

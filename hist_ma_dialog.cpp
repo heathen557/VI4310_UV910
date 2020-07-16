@@ -760,6 +760,8 @@ void Hist_MA_Dialog::toShowHistogram_channel3_slot(QVector<double> histogram_vec
     ui->hold3_label->setText(QString::number(holdRatio,'f',2));
 
 
+
+
     QVector<double> showHistogram_vec;
     showHistogram_vec = histogram_vec;
     showHistogram_vec.resize(binSize);
@@ -850,6 +852,8 @@ void Hist_MA_Dialog::toShowHistogram_channel4_slot(QVector<double> histogram_vec
     }
     float holdRatio = holdValueNum/allPointsNum;
     ui->hold4_label->setText(QString::number(holdRatio,'f',2));
+
+
 
 
     QVector<double> showHistogram_vec;
@@ -945,6 +949,11 @@ void Hist_MA_Dialog::on_bin_start_pushButton_clicked()
     // 清空已有的数据
     ui->currentExposureNum_label->setText("0");
     emit clearHistogram_signal();
+
+    TDC_min = ui->TDC_min_lineEdit->text().toInt();
+    qDebug()<<"TDC_min = "<<TDC_min;
+    TDC_max = ui->TDC_max_lineEdit->text().toInt();
+    qDebug()<<"TDC_max = "<<TDC_max;
 
 
 //  开启binning rawData测试  曝光次数，积分次数，初始行、初始列、 窗口大小（2、4）
